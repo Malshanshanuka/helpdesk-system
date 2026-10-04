@@ -8,4 +8,4 @@ A self-service IT helpdesk built with the MERN stack.
 - Database: MongoDB, Mongoose
 
 ## Status
-Work in progress 🚧
+Work in progress

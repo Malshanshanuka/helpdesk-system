@@ -1,3 +1,4 @@
+import userRoutes from "./routes/userRoutes.js";
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
@@ -14,6 +15,7 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err);

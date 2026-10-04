@@ -1,3 +1,4 @@
+import ticketRoutes from "./routes/ticketRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import "dotenv/config";
 import express from "express";
@@ -16,6 +17,7 @@ app.get("/api/health", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/tickets", ticketRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err);

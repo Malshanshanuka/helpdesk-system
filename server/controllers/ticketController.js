@@ -1,3 +1,4 @@
+import logActivity from "../utils/logActivity.js";
 import Ticket from "../models/Ticket.js";
 import User from "../models/User.js";
 
@@ -22,6 +23,8 @@ export const createTicket = async (req, res) => {
     priority,
     createdBy: req.user._id,
   });
+
+  await logActivity(ticket._id, req.user._id, "created", `Priority: ${ticket.priority}`);
 
   const populated = await populateTicket(Ticket.findById(ticket._id));
   res.status(201).json(populated);
@@ -71,8 +74,11 @@ export const updateTicketStatus = async (req, res) => {
     return res.status(404).json({ message: "Ticket not found" });
   }
 
+  const previous = ticket.status;
   ticket.status = status;
   await ticket.save();
+
+  await logActivity(ticket._id, req.user._id, "status_changed", `${previous} to ${status}`);
 
   const populated = await populateTicket(Ticket.findById(ticket._id));
   res.json(populated);
@@ -86,8 +92,9 @@ export const assignTicket = async (req, res) => {
     return res.status(404).json({ message: "Ticket not found" });
   }
 
+  let agent = null;
   if (assignedTo) {
-    const agent = await User.findById(assignedTo);
+    agent = await User.findById(assignedTo);
     if (!agent || !["it_support", "admin"].includes(agent.role)) {
       return res.status(400).json({ message: "Tickets can only be assigned to IT support staff" });
     }
@@ -95,6 +102,12 @@ export const assignTicket = async (req, res) => {
 
   ticket.assignedTo = assignedTo || null;
   await ticket.save();
+
+  if (agent) {
+    await logActivity(ticket._id, req.user._id, "assigned", `Assigned to ${agent.name}`);
+  } else {
+    await logActivity(ticket._id, req.user._id, "unassigned");
+  }
 
   const populated = await populateTicket(Ticket.findById(ticket._id));
   res.json(populated);

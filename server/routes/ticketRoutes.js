@@ -1,3 +1,5 @@
+import { getComments, addComment, getActivity } from "../controllers/commentController.js";
+import upload from "../middleware/uploadMiddleware.js";
 import express from "express";
 import {
   createTicket,
@@ -14,6 +16,9 @@ router.use(protect);
 
 router.route("/").post(createTicket).get(getTickets);
 router.get("/:id", getTicketById);
+router.get("/:id/comments", getComments);
+router.post("/:id/comments", upload.array("attachments", 3), addComment);
+router.get("/:id/activity", getActivity);
 router.patch("/:id/status", authorize("it_support", "admin"), updateTicketStatus);
 router.patch("/:id/assign", authorize("it_support", "admin"), assignTicket);
 

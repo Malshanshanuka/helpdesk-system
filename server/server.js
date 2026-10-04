@@ -1,3 +1,4 @@
+import statsRoutes from "./routes/statsRoutes.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import { protect } from "./middleware/authMiddleware.js";
@@ -21,6 +22,7 @@ app.get("/api/health", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/tickets", ticketRoutes);
+app.use("/api/stats", statsRoutes);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 app.get("/api/files/:filename", protect, (req, res) => {

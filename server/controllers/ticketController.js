@@ -42,8 +42,44 @@ export const getTickets = async (req, res) => {
   if (req.query.priority) filter.priority = req.query.priority;
   if (req.query.category) filter.category = req.query.category;
 
-  const tickets = await populateTicket(Ticket.find(filter).sort({ createdAt: -1 }));
-  res.json(tickets);
+  if (req.query.assignedTo === "me") {
+    filter.assignedTo = req.user._id;
+  } else if (req.query.assignedTo === "unassigned") {
+    filter.assignedTo = null;
+  }
+
+  if (req.query.search) {
+    const term = req.query.search.trim();
+    const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(escaped, "i");
+
+    const or = [{ title: regex }, { description: regex }];
+    if (/^#?\d+$/.test(term)) {
+      or.push({ ticketNumber: Number(term.replace("#", "")) });
+    }
+    filter.$or = or;
+  }
+
+  const page = Math.max(parseInt(req.query.page) || 1, 1);
+  const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 50);
+
+  const [tickets, total] = await Promise.all([
+    populateTicket(
+      Ticket.find(filter)
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+    ),
+    Ticket.countDocuments(filter),
+  ]);
+
+  res.json({
+    tickets,
+    page,
+    limit,
+    total,
+    totalPages: Math.ceil(total / limit),
+  });
 };
 
 export const getTicketById = async (req, res) => {

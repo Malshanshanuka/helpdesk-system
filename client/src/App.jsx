@@ -1,16 +1,18 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Home from "./pages/Home";
+import RoleHome from "./pages/RoleHome";
 import CreateTicket from "./pages/CreateTicket";
 import MyRequests from "./pages/MyRequests";
 import TicketDetails from "./pages/TicketDetails";
-import Layout from "./components/Layout";
-import ProtectedRoute from "./components/ProtectedRoute";
-import ComingSoon from "./components/ComingSoon";
-import RoleHome from "./pages/RoleHome";
 import StaffTickets from "./pages/StaffTickets";
 import Users from "./pages/Users";
+import KnowledgeBase from "./pages/KnowledgeBase";
+import ArticleView from "./pages/ArticleView";
+import ManageArticles from "./pages/ManageArticles";
+import ArticleEditor from "./pages/ArticleEditor";
+import Layout from "./components/Layout";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -24,14 +26,19 @@ function App() {
           <Route path="/tickets/new" element={<CreateTicket />} />
           <Route path="/requests" element={<MyRequests />} />
           <Route path="/requests/:id" element={<TicketDetails />} />
-          <Route path="/knowledge" element={<ComingSoon title="Knowledge Base" />} />
-          <Route element={<ProtectedRoute roles={["it_support", "admin"]} />}>
-  <Route path="/queue" element={<StaffTickets />} />
+          <Route path="/knowledge" element={<KnowledgeBase />} />
+          <Route path="/knowledge/:id" element={<ArticleView />} />
 
-</Route>
-<Route element={<ProtectedRoute roles={["admin"]} />}>
-  <Route path="/users" element={<Users />} />
-</Route>
+          <Route element={<ProtectedRoute roles={["it_support", "admin"]} />}>
+            <Route path="/queue" element={<StaffTickets />} />
+            <Route path="/knowledge/manage" element={<ManageArticles />} />
+            <Route path="/knowledge/new" element={<ArticleEditor />} />
+            <Route path="/knowledge/:id/edit" element={<ArticleEditor />} />
+          </Route>
+
+          <Route element={<ProtectedRoute roles={["admin"]} />}>
+            <Route path="/users" element={<Users />} />
+          </Route>
         </Route>
       </Route>
 

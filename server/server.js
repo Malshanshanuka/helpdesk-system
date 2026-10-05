@@ -9,6 +9,7 @@ import express from "express";
 import cors from "cors";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
+import articleRoutes from "./routes/articleRoutes.js";
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/stats", statsRoutes);
+app.use("/api/articles", articleRoutes);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 app.get("/api/files/:filename", protect, (req, res) => {

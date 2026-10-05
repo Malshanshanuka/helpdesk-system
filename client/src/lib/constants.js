@@ -1,4 +1,4 @@
-import { Monitor, Wifi, KeyRound, Mail, AppWindow, LifeBuoy } from "lucide-react";
+import { Monitor, Wifi, KeyRound, Mail, AppWindow, LifeBuoy, ShieldCheck } from "lucide-react";
 
 // Values must match the category enum in the backend Ticket model
 export const CATEGORIES = [
@@ -27,3 +27,20 @@ export const STATUS_STYLES = {
 
 export const categoryLabel = (value) =>
   CATEGORIES.find((c) => c.value === value)?.label ?? value;
+
+// Values must match ARTICLE_CATEGORIES in the backend Article model
+export const KB_CATEGORIES = [
+  { value: "computer", label: "Computer", icon: Monitor },
+  { value: "network", label: "Network", icon: Wifi },
+  { value: "email", label: "Email", icon: Mail },
+  { value: "account", label: "Accounts", icon: KeyRound },
+  { value: "software", label: "Software", icon: AppWindow },
+  { value: "security", label: "Security", icon: ShieldCheck },
+];
+
+export const kbCategoryLabel = (value) =>
+  KB_CATEGORIES.find((c) => c.value === value)?.label ?? value;
+
+// Article category to the closest ticket category
+export const ticketCategoryFor = (kbCategory) =>
+  kbCategory === "security" ? "other" : kbCategory;

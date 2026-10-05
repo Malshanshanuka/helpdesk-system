@@ -9,6 +9,7 @@ const linkClass = ({ isActive }) =>
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const isStaff = user.role === "it_support" || user.role === "admin";
 
   const handleLogout = () => {
     logout();
@@ -21,16 +22,29 @@ export default function Navbar() {
         <div className="flex items-center gap-6">
           <span className="text-xl font-bold text-blue-600">HelpDesk</span>
           <nav className="flex items-center gap-1">
-            <NavLink to="/" end className={linkClass}>
-              Home
-            </NavLink>
-            <NavLink to="/requests" className={linkClass}>
-              My Requests
-            </NavLink>
-            <NavLink to="/knowledge" className={linkClass}>
-              Knowledge Base
-            </NavLink>
-          </nav>
+  {isStaff ? (
+    <>
+      <NavLink to="/" end className={linkClass}>
+        Dashboard
+      </NavLink>
+      <NavLink to="/queue" className={linkClass}>
+        All Tickets
+      </NavLink>
+    </>
+  ) : (
+    <>
+      <NavLink to="/" end className={linkClass}>
+        Home
+      </NavLink>
+      <NavLink to="/requests" className={linkClass}>
+        My Requests
+      </NavLink>
+      <NavLink to="/knowledge" className={linkClass}>
+        Knowledge Base
+      </NavLink>
+    </>
+  )}
+</nav>
         </div>
 
         <div className="flex items-center gap-3">

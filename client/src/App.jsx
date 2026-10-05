@@ -8,6 +8,8 @@ import TicketDetails from "./pages/TicketDetails";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ComingSoon from "./components/ComingSoon";
+import RoleHome from "./pages/RoleHome";
+import StaffTickets from "./pages/StaffTickets";
 
 function App() {
   return (
@@ -17,11 +19,14 @@ function App() {
 
       <Route element={<ProtectedRoute />}>
         <Route element={<Layout />}>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<RoleHome />} />
           <Route path="/tickets/new" element={<CreateTicket />} />
           <Route path="/requests" element={<MyRequests />} />
           <Route path="/requests/:id" element={<TicketDetails />} />
           <Route path="/knowledge" element={<ComingSoon title="Knowledge Base" />} />
+          <Route element={<ProtectedRoute roles={["it_support", "admin"]} />}>
+  <Route path="/queue" element={<StaffTickets />} />
+</Route>
         </Route>
       </Route>
 

@@ -29,7 +29,16 @@ export default function Navbar() {
       </NavLink>
       <NavLink to="/queue" className={linkClass}>
         All Tickets
+        
       </NavLink>
+      <NavLink to="/queue" className={linkClass}>
+  All Tickets
+</NavLink>
+{user.role === "admin" && (
+  <NavLink to="/users" className={linkClass}>
+    Users
+  </NavLink>
+)}
     </>
   ) : (
     <>

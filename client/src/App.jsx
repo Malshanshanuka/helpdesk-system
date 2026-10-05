@@ -10,6 +10,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ComingSoon from "./components/ComingSoon";
 import RoleHome from "./pages/RoleHome";
 import StaffTickets from "./pages/StaffTickets";
+import Users from "./pages/Users";
 
 function App() {
   return (
@@ -26,6 +27,10 @@ function App() {
           <Route path="/knowledge" element={<ComingSoon title="Knowledge Base" />} />
           <Route element={<ProtectedRoute roles={["it_support", "admin"]} />}>
   <Route path="/queue" element={<StaffTickets />} />
+
+</Route>
+<Route element={<ProtectedRoute roles={["admin"]} />}>
+  <Route path="/users" element={<Users />} />
 </Route>
         </Route>
       </Route>

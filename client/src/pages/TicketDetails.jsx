@@ -42,6 +42,7 @@ export default function TicketDetails() {
   const [replyError, setReplyError] = useState("");
   const [showHistory, setShowHistory] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [staff, setStaff] = useState([]);
 const [actionError, setActionError] = useState("");
 
 const isStaff = user.role === "it_support" || user.role === "admin";
@@ -106,6 +107,19 @@ const assignTo = async (assignedTo) => {
       ignore = true;
     };
   }, [id]);
+
+  useEffect(() => {
+  if (user.role !== "admin") return;
+
+  Promise.all([
+    api.get("/users", { params: { role: "it_support" } }),
+    api.get("/users", { params: { role: "admin" } }),
+  ])
+    .then(([agents, admins]) => {
+      setStaff([...agents.data, ...admins.data].filter((u) => u.isActive));
+    })
+    .catch(() => {});
+}, [user.role]);
 
   const handleFiles = (e) => {
     const picked = Array.from(e.target.files);
@@ -195,7 +209,43 @@ const assignTo = async (assignedTo) => {
           <StatusBadge status={ticket.status} />
         </div>
         <p className="mt-3 text-sm text-slate-500">
-          {ticket.assignedTo ? `Assigned to ${ticket.assignedTo.name}` : "Waiting to be assigned"}
+          {user.role === "admin" ? (
+  <div>
+    <label className="mb-1 block text-sm font-medium text-slate-700">Assigned to</label>
+    <select
+      value={ticket.assignedTo?._id ?? ""}
+      onChange={(e) => assignTo(e.target.value || null)}
+      disabled={updating}
+      className="rounded-lg border border-slate-300 bg-white px-3 py-2 outline-none focus:border-blue-500 disabled:opacity-60"
+    >
+      <option value="">Unassigned</option>
+      {staff.map((s) => (
+        <option key={s._id} value={s._id}>
+          {s.name}
+          {s.role === "admin" ? " (Admin)" : ""}
+        </option>
+      ))}
+    </select>
+  </div>
+) : ticket.assignedTo?._id === user._id ? (
+  <button
+    type="button"
+    disabled={updating}
+    onClick={() => assignTo(null)}
+    className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-60"
+  >
+    Unassign me
+  </button>
+) : (
+  <button
+    type="button"
+    disabled={updating}
+    onClick={() => assignTo(user._id)}
+    className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+  >
+    Assign to me
+  </button>
+)}
         </p>
       </div>
 

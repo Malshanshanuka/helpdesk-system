@@ -1,22 +1,27 @@
-import { useState } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Home from "./pages/Home";
+import Layout from "./components/Layout";
+import ProtectedRoute from "./components/ProtectedRoute";
+import ComingSoon from "./components/ComingSoon";
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-      <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
-        <h1 className="text-3xl font-bold text-blue-600">HelpDesk</h1>
-        <p className="mt-2 text-slate-600">React and Tailwind are working</p>
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
-        <button
-          onClick={() => setCount(count + 1)}
-          className="mt-6 rounded-lg bg-blue-600 px-5 py-2 text-white hover:bg-blue-700"
-        >
-          Clicked {count} times
-        </button>
-      </div>
-    </div>
+      <Route element={<ProtectedRoute />}>
+        <Route element={<Layout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/requests" element={<ComingSoon title="My Requests" />} />
+          <Route path="/knowledge" element={<ComingSoon title="Knowledge Base" />} />
+        </Route>
+      </Route>
+
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 

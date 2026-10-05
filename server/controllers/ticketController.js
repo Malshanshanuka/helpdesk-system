@@ -1,3 +1,4 @@
+import sendEmail from "../utils/sendEmail.js";
 import logActivity from "../utils/logActivity.js";
 import Ticket from "../models/Ticket.js";
 import User from "../models/User.js";
@@ -13,6 +14,7 @@ export const createTicket = async (req, res) => {
   const { title, description, category, priority } = req.body;
 
   if (!title || !description || !category) {
+
     return res.status(400).json({ message: "Title, description and category are required" });
   }
 
@@ -27,6 +29,11 @@ export const createTicket = async (req, res) => {
   await logActivity(ticket._id, req.user._id, "created", `Priority: ${ticket.priority}`);
 
   const populated = await populateTicket(Ticket.findById(ticket._id));
+  sendEmail({
+  to: req.user.email,
+  subject: `Ticket #${ticket.ticketNumber} created`,
+  text: `Hi ${req.user.name},\n\nYour ticket "${ticket.title}" has been received. Our IT team will get back to you soon.\n\nTicket number: #${ticket.ticketNumber}\nPriority: ${ticket.priority}`,
+});
   res.status(201).json(populated);
 };
 
@@ -115,6 +122,12 @@ export const updateTicketStatus = async (req, res) => {
   await ticket.save();
 
   await logActivity(ticket._id, req.user._id, "status_changed", `${previous} to ${status}`);
+  const owner = await User.findById(ticket.createdBy);
+sendEmail({
+  to: owner.email,
+  subject: `Ticket #${ticket.ticketNumber} is now ${status.replace("_", " ")}`,
+  text: `Hi ${owner.name},\n\nThe status of your ticket "${ticket.title}" changed from ${previous.replace("_", " ")} to ${status.replace("_", " ")}.`,
+});
 
   const populated = await populateTicket(Ticket.findById(ticket._id));
   res.json(populated);
@@ -141,6 +154,11 @@ export const assignTicket = async (req, res) => {
 
   if (agent) {
     await logActivity(ticket._id, req.user._id, "assigned", `Assigned to ${agent.name}`);
+    sendEmail({
+  to: agent.email,
+  subject: `Ticket #${ticket.ticketNumber} assigned to you`,
+  text: `Hi ${agent.name},\n\nTicket "${ticket.title}" has been assigned to you.\nPriority: ${ticket.priority}`,
+});
   } else {
     await logActivity(ticket._id, req.user._id, "unassigned");
   }

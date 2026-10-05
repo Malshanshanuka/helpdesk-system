@@ -13,12 +13,16 @@ import ManageArticles from "./pages/ManageArticles";
 import ArticleEditor from "./pages/ArticleEditor";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+<Route path="/reset-password/:token" element={<ResetPassword />} />
 
       <Route element={<ProtectedRoute />}>
         <Route element={<Layout />}>

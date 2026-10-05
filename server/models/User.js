@@ -19,6 +19,8 @@ const userSchema = new mongoose.Schema(
     },
     department: { type: String, trim: true },
     isActive: { type: Boolean, default: true },
+     passwordResetToken: { type: String, select: false },
+    passwordResetExpires: { type: Date, select: false },
   },
   { timestamps: true }
 );

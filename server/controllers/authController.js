@@ -1,5 +1,7 @@
 import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js";
+import crypto from "crypto";
+import sendEmail from "../utils/sendEmail.js";
 
 const userResponse = (user) => ({
   _id: user._id,
@@ -50,4 +52,65 @@ export const loginUser = async (req, res) => {
 
 export const getMe = async (req, res) => {
   res.json(req.user);
+};
+const hashToken = (token) => crypto.createHash("sha256").update(token).digest("hex");
+
+export const forgotPassword = async (req, res) => {
+  const email = (req.body.email || "").trim().toLowerCase();
+
+  if (!email) {
+    return res.status(400).json({ message: "Email is required" });
+  }
+
+  // The same reply is sent whether or not the account exists
+  const reply = { message: "If an account exists for that email, a reset link has been sent" };
+
+  const user = await User.findOne({ email });
+  if (!user || !user.isActive) {
+    return res.json(reply);
+  }
+
+  const token = crypto.randomBytes(32).toString("hex");
+  user.passwordResetToken = hashToken(token);
+  user.passwordResetExpires = new Date(Date.now() + 30 * 60 * 1000);
+  await user.save();
+
+  const clientUrl = (process.env.CLIENT_URL || "").split(",")[0].trim();
+  const link = `${clientUrl}/reset-password/${token}`;
+
+  if (process.env.EMAIL_ENABLED !== "true" && process.env.NODE_ENV !== "production") {
+    console.log(`Password reset link for ${email}: ${link}`);
+  }
+
+  sendEmail({
+    to: user.email,
+    subject: "Reset your HelpDesk password",
+    text: `Hi ${user.name},\n\nUse this link to choose a new password. It expires in 30 minutes.\n\n${link}\n\nIf you did not ask for this, you can ignore this email.`,
+  });
+
+  res.json(reply);
+};
+
+export const resetPassword = async (req, res) => {
+  const { password } = req.body;
+
+  if (!password || password.length < 6) {
+    return res.status(400).json({ message: "Password must be at least 6 characters" });
+  }
+
+  const user = await User.findOne({
+    passwordResetToken: hashToken(req.params.token),
+    passwordResetExpires: { $gt: new Date() },
+  });
+
+  if (!user) {
+    return res.status(400).json({ message: "This reset link is invalid or has expired" });
+  }
+
+  user.password = password;
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+  await user.save();
+
+  res.json({ message: "Password updated. You can now sign in." });
 };

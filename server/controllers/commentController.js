@@ -23,54 +23,66 @@ const getAccessibleTicket = async (req, res) => {
 };
 
 export const getComments = async (req, res) => {
-  const ticket = await getAccessibleTicket(req, res);
-  if (!ticket) return;
+  try {
+    const ticket = await getAccessibleTicket(req, res);
+    if (!ticket) return;
 
-  const comments = await Comment.find({ ticket: ticket._id })
-    .sort({ createdAt: 1 })
-    .populate("author", "name role");
+    const comments = await Comment.find({ ticket: ticket._id })
+      .sort({ createdAt: 1 })
+      .populate("author", "name role");
 
-  res.json(comments);
+    res.json(comments);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
 export const addComment = async (req, res) => {
-  const ticket = await getAccessibleTicket(req, res);
-  if (!ticket) return;
+  try {
+    const ticket = await getAccessibleTicket(req, res);
+    if (!ticket) return;
 
-  const message = (req.body.message || "").trim();
-  const files = req.files || [];
+    const message = (req.body.message || "").trim();
+    const files = req.files || [];
 
-  if (!message && files.length === 0) {
-    return res.status(400).json({ message: "A message or an attachment is required" });
+    if (!message && files.length === 0) {
+      return res.status(400).json({ message: "A message or an attachment is required" });
+    }
+
+    const attachments = files.map((f) => ({
+      filename: f.filename,
+      originalName: f.originalname,
+      mimetype: f.mimetype,
+      size: f.size,
+    }));
+
+    const comment = await Comment.create({
+      ticket: ticket._id,
+      author: req.user._id,
+      message,
+      attachments,
+    });
+
+    await logActivity(ticket._id, req.user._id, "commented");
+
+    const populated = await comment.populate("author", "name role");
+    res.status(201).json(populated);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
-
-  const attachments = files.map((f) => ({
-    filename: f.filename,
-    originalName: f.originalname,
-    mimetype: f.mimetype,
-    size: f.size,
-  }));
-
-  const comment = await Comment.create({
-    ticket: ticket._id,
-    author: req.user._id,
-    message,
-    attachments,
-  });
-
-  await logActivity(ticket._id, req.user._id, "commented");
-
-  const populated = await comment.populate("author", "name role");
-  res.status(201).json(populated);
 };
 
 export const getActivity = async (req, res) => {
-  const ticket = await getAccessibleTicket(req, res);
-  if (!ticket) return;
+  try {
+    const ticket = await getAccessibleTicket(req, res);
+    if (!ticket) return;
 
-  const activity = await Activity.find({ ticket: ticket._id })
-    .sort({ createdAt: 1 })
-    .populate("actor", "name role");
+    const activity = await Activity.find({ ticket: ticket._id })
+      .sort({ createdAt: 1 })
+      .populate("actor", "name role");
 
-  res.json(activity);
+    res.json(activity);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };

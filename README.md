@@ -37,7 +37,7 @@ A self-service, full-stack IT helpdesk application built with the **MERN** (Mong
 
 ## 📸 Screenshots
 
-| Dashboard | Ticket View |
+| Admin Dashboard | Ticket View |
 |:---:|:---:|
 | <img src="./docs/screenshots/admin-dashboard.jpg" alt="Admin Dashboard" width="400" /> | <img src="./docs/screenshots/admin-all-tickets.jpeg" alt="Ticket Queue" width="400" /> |
 
